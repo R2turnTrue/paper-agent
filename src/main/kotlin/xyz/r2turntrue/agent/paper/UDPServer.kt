@@ -1,6 +1,7 @@
 package xyz.r2turntrue.agent.paper
 
 import com.google.gson.JsonParser
+import xyz.r2turntrue.agent.paper.gson.AtkNearEntities
 import xyz.r2turntrue.agent.paper.gson.RequestEntityPosition
 import xyz.r2turntrue.agent.paper.gson.TeleportEntity
 import xyz.r2turntrue.agent.paper.gson.type.Position
@@ -11,8 +12,9 @@ import java.util.concurrent.CompletableFuture
 object UDPServer {
 
     fun start(port: Int) {
-        val ds = DatagramSocket(port)
         CompletableFuture.runAsync {
+            val ds = DatagramSocket(port)
+            println("Created server on $port")
             while(true) {
                 val buffer = ByteArray(512)
                 var dp = DatagramPacket(buffer, buffer.size)
@@ -34,6 +36,11 @@ object UDPServer {
                             Position(
                                 pos.get("x").asDouble, pos.get("y").asDouble, pos.get("z").asDouble, pos.get("yaw").asFloat, pos.get("pitch").asFloat)))
                     }
+                    "attack_near_entities" ->
+                        AtkNearEntities.process(ds,
+                            AtkNearEntities.AtkNearEntities(parsed.get("entity_uuid").asString, parsed.get("radius").asDouble, parsed.get("damage").asDouble),
+                            dp.address,
+                            dp.port)
                 }
             }
         }
