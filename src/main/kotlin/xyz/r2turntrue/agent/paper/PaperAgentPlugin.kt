@@ -8,7 +8,7 @@ val GSON = Gson()
 class PaperAgentPlugin: JavaPlugin() {
 
     override fun onEnable() {
-
+        UDPServer.start(5555)
     }
 
 }
