@@ -1,6 +1,6 @@
-name: ${pluginName}
+name: paper-agent
 version: ${version}
-main: ${group}.${packageName}.plugin.${pluginName}Plugin
+main: xyz.r2turntrue.agent.paper.PaperAgentPlugin
 api-version: 1.18
 libraries:
   - org.jetbrains.kotlin:kotlin-stdlib:1.6.10
