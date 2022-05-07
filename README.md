@@ -1,16 +1,133 @@
-# Paper plugin sample (Kotlin)
+# Paper Agent
+UDP 소켓 통신을 통해 UDP 통신이 가능한 모든 프로세스와 페이퍼 서버를 연결할 수 있습니다.
 
-[![Kotlin](https://img.shields.io/badge/java-17.0.2-ED8B00.svg?logo=java)](https://www.azul.com/)
-[![Kotlin](https://img.shields.io/badge/kotlin-1.6.10-585DEF.svg?logo=kotlin)](http://kotlinlang.org)
-[![Gradle](https://img.shields.io/badge/gradle-7.2-02303A.svg?logo=gradle)](https://gradle.org)
-[![GitHub](https://img.shields.io/github/license/monun/paper-sample)](https://www.gnu.org/licenses/gpl-3.0.html)
-[![Kotlin](https://img.shields.io/badge/youtube-각별-red.svg?logo=youtube)](https://www.youtube.com/channel/UCDrAR1OWC2MD4s0JLetN0MA)
+## Object Types
+* \*는 필수 필드입니다.
+### position
+#### Fields
+##### x(double, *)
+X 좌표를 나타냅니다.
+##### y(double, *)
+Y 좌표를 나타냅니다.
+##### z (double, *)
+Z 좌표를 나타냅니다.
+##### yaw (double, *)
+rotation의 yaw를 나타냅니다.
+##### pitch (double, *)
+rotation의 pitch를 나타냅니다.
 
-### Suggested libraries
-* #### `io.github.monun:tap` [![Maven Central](https://img.shields.io/maven-central/v/io.github.monun/tap)](https://search.maven.org/artifact/io.github.monun/tap/)
-* #### `io.github.monun:invfx` [![Maven Central](https://img.shields.io/maven-central/v/io.github.monun/invfx)](https://search.maven.org/artifact/io.github.monun/invfx/)
-* #### `io.github.monun:kommand-api` [![Maven Central](https://img.shields.io/maven-central/v/io.github.monun/kommand-api)](https://search.maven.org/artifact/io.github.monun/kommand-api/)
-* #### `io.github.monun:kommand-core` [![Maven Central](https://img.shields.io/maven-central/v/io.github.monun/kommand-core)](https://search.maven.org/artifact/io.github.monun/kommand-core/)
-* #### `org.jetbrains.exposed:exposed-core` [![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.exposed/exposed-core)](https://search.maven.org/artifact/org.jetbrains.exposed/exposed-core/)
-* #### `org.jetbrains.kotlinx:kotlinx-coroutines-core` [![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-coroutines-core)](https://search.maven.org/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core/)
-* #### `io.github.monun:heartbeat-coroutines` [![Maven Central](https://img.shields.io/maven-central/v/io.github.monun/heartbeat-coroutines)](https://search.maven.org/artifact/io.github.monun/heartbeat-coroutines/)
+#### Example
+
+```json
+{
+  "x": 0.0,
+  "y": 0.0,
+  "z": 0.0,
+  "yaw": 0.0,
+  "pitch": 0.0
+}
+```
+
+## Actions
+* UDP 서버는 5555 포트에서 실행됩니다.
+* 인증 과정이 없으므로 외부와 통신하기 위해서는 방화벽 설정이 필요합니다.
+* 모든 UUID에는 대시(-) 기호가 필요합니다.
+
+### Serverbound
+### request_entity_position
+#### Parameters
+##### entity_uuid (string)
+대상 엔티티의 UUID를 나타냅니다.
+
+#### Act
+해당 entity가 존재할 시, 해당 entity의 위치를 전송합니다 (responded_entity_position 참고). 존재하지 않을 시, 전송되지 않습니다.
+
+#### Example request
+```json
+{
+  "__type__": "request_entity_position",
+  "entity_uuid": "e4470236-cdb7-11ec-9d64-0242ac120002"
+}
+```
+
+### teleport_entity
+#### Parameters
+##### entity_uuid (string)
+대상 엔티티의 UUID를 나타냅니다.
+##### to (position)
+이동할 위치를 나타냅니다.
+
+#### Act
+해당 entity가 존재할 시, 해당 entity를 to 위치로 이동합니다.
+
+#### Example request
+
+```json
+{
+  "__type__": "teleport_entity",
+  "entity_uuid": "e4470236-cdb7-11ec-9d64-0242ac120002",
+  "to": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "yaw": 0.0,
+    "pitch": 0.0
+  }
+}
+```
+
+### attack_near_entities
+#### Parameters
+##### entity_uuid (string)
+대상 엔티티의 UUID를 나타냅니다.
+##### radius (double)
+대상 엔티티로부터의 공격할 엔티티까지의 반지름을 나타냅니다.
+##### damage
+공격할 엔티티가 받을 데미지를 설정합니다.
+
+#### Act
+해당 entity를 제외한 해당 entity로부터 주변 radius만큼의 엔티티를 공격한 뒤, 공격받은 엔티티의 수를 전송합니다. (attacked_near_entities 참고)
+
+#### Example request
+
+```json
+{
+  "__type__": "teleport_entity",
+  "entity_uuid": "e4470236-cdb7-11ec-9d64-0242ac120002",
+  "to": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "yaw": 0.0,
+    "pitch": 0.0
+  }
+}
+```
+
+## Clientbound
+### responded_entity_position
+request_entity_position에서 반환된 position 값을 전송합니다.
+#### Example respond
+```json
+{
+  "__type__": "responded_entity_position",
+  "x": 0.0,
+  "y": 0.0,
+  "z": 0.0,
+  "yaw": 0.0,
+  "pitch": 0.0
+}
+```
+
+### attacked_near_entities
+attack_near_entities에서 공격된 엔티티의 수를 전송합니다.
+#### Fields
+##### size
+공격받은 엔티티의 수입니다. 0일시 아무 엔티티도 공격받지 않은 것 입니다.
+#### Example respond
+```json
+{
+  "__type__": "attacked_near_entities",
+  "size": 0
+}
+```
